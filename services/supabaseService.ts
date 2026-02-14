@@ -1,7 +1,44 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { Product, Order, DbConfig, Category } from '../types';
+import { sendSystemAlert } from './notificationService';
 
 let supabase: SupabaseClient | null = null;
+
+// --- ERROR MONITORING HELPER ---
+const handleDbError = async (context: string, error: any) => {
+  console.error(`DB Error in [${context}]:`, error);
+
+  // Retrieve contact info saved in AdminSettings
+  const contactInfoJson = localStorage.getItem('ADMIN_CONTACT_INFO');
+  
+  if (contactInfoJson) {
+    try {
+      const contact = JSON.parse(contactInfoJson);
+      const time = new Date().toLocaleString();
+      const message = `⚠️ ALERTA DE SISTEMA: Falha crítica detectada no banco de dados.\nContexto: ${context}\nErro: ${error.message || JSON.stringify(error)}\nData: ${time}`;
+
+      // Notify Email if configured
+      if (contact.notifyEmail && contact.email) {
+        await sendSystemAlert({
+          recipient: contact.email,
+          message: message,
+          type: 'email'
+        });
+      }
+
+      // Notify WhatsApp if configured
+      if (contact.notifyWhatsapp && contact.phone) {
+        await sendSystemAlert({
+          recipient: contact.phone,
+          message: message,
+          type: 'whatsapp'
+        });
+      }
+    } catch (parseError) {
+      console.error("Failed to parse admin contact info during error handling", parseError);
+    }
+  }
+};
 
 export const initSupabase = (config: DbConfig) => {
   if (config.url && config.key) {
@@ -9,7 +46,7 @@ export const initSupabase = (config: DbConfig) => {
       supabase = createClient(config.url, config.key);
       return true;
     } catch (e) {
-      console.error("Supabase init error:", e);
+      handleDbError('initSupabase', e);
       return false;
     }
   }
@@ -23,7 +60,7 @@ export const checkConnection = async (): Promise<boolean> => {
     if (error) throw error;
     return true;
   } catch (e) {
-    console.error("Connection check failed:", e);
+    handleDbError('checkConnection', e);
     return false;
   }
 };
@@ -34,7 +71,7 @@ export const fetchProducts = async (): Promise<Product[]> => {
   if (!supabase) return [];
   const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
   if (error) {
-    console.error("Fetch products error:", error);
+    handleDbError('fetchProducts', error);
     return [];
   }
   return data as Product[];
@@ -44,7 +81,7 @@ export const createProduct = async (product: Omit<Product, 'id'>): Promise<Produ
   if (!supabase) return null;
   const { data, error } = await supabase.from('products').insert([product]).select().single();
   if (error) {
-    console.error("Create product error:", error);
+    handleDbError('createProduct', error);
     return null;
   }
   return data as Product;
@@ -54,7 +91,7 @@ export const updateProduct = async (id: string, updates: Partial<Product>): Prom
   if (!supabase) return false;
   const { error } = await supabase.from('products').update(updates).eq('id', id);
   if (error) {
-    console.error("Update product error:", error);
+    handleDbError('updateProduct', error);
     return false;
   }
   return true;
@@ -63,7 +100,10 @@ export const updateProduct = async (id: string, updates: Partial<Product>): Prom
 export const deleteProduct = async (id: string): Promise<boolean> => {
   if (!supabase) return false;
   const { error } = await supabase.from('products').delete().eq('id', id);
-  if (error) return false;
+  if (error) {
+    handleDbError('deleteProduct', error);
+    return false;
+  }
   return true;
 };
 
@@ -73,7 +113,7 @@ export const fetchCategories = async (): Promise<Category[]> => {
   if (!supabase) return [];
   const { data, error } = await supabase.from('categories').select('*').order('created_at', { ascending: true });
   if (error) {
-    console.error("Fetch categories error:", error);
+    handleDbError('fetchCategories', error);
     return [];
   }
   return data as Category[];
@@ -83,7 +123,7 @@ export const createCategory = async (category: Omit<Category, 'id'>): Promise<Ca
   if (!supabase) return null;
   const { data, error } = await supabase.from('categories').insert([category]).select().single();
   if (error) {
-    console.error("Create category error:", error);
+    handleDbError('createCategory', error);
     return null;
   }
   return data as Category;
@@ -92,14 +132,20 @@ export const createCategory = async (category: Omit<Category, 'id'>): Promise<Ca
 export const updateCategory = async (id: string, updates: Partial<Category>): Promise<boolean> => {
   if (!supabase) return false;
   const { error } = await supabase.from('categories').update(updates).eq('id', id);
-  if (error) return false;
+  if (error) {
+    handleDbError('updateCategory', error);
+    return false;
+  }
   return true;
 };
 
 export const deleteCategory = async (id: string): Promise<boolean> => {
   if (!supabase) return false;
   const { error } = await supabase.from('categories').delete().eq('id', id);
-  if (error) return false;
+  if (error) {
+    handleDbError('deleteCategory', error);
+    return false;
+  }
   return true;
 };
 
@@ -112,11 +158,12 @@ export const createOrder = async (order: Omit<Order, 'id' | 'created_at'>): Prom
     total: order.total,
     status: order.status,
     tracking_code: order.tracking_code,
+    shipping_method: order.shipping_method,
     items: order.items
   }]);
   
   if (error) {
-    console.error("Create order error:", error);
+    handleDbError('createOrder', error);
     return false;
   }
   return true;
@@ -125,6 +172,9 @@ export const createOrder = async (order: Omit<Order, 'id' | 'created_at'>): Prom
 export const fetchOrders = async (): Promise<Order[]> => {
   if (!supabase) return [];
   const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
-  if (error) return [];
+  if (error) {
+    handleDbError('fetchOrders', error);
+    return [];
+  }
   return data as Order[];
 };

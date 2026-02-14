@@ -33,6 +33,7 @@ export interface Order {
   total: number;
   status: 'pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled';
   tracking_code?: string;
+  shipping_method?: string;
   created_at: string;
   items: CartItem[];
 }

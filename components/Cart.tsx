@@ -31,7 +31,8 @@ const Cart: React.FC<CartProps> = ({ items, isOpen, onClose, onRemoveItem, onCle
         customer_name: "Cliente Demo", // simplified for this UI
         total: total,
         status: 'paid',
-        items: items
+        items: items,
+        shipping_method: 'Frete Expresso (SP)' // Default selected method
       });
       if (!success) console.error("Could not save order to DB");
     }
@@ -97,6 +98,11 @@ const Cart: React.FC<CartProps> = ({ items, isOpen, onClose, onRemoveItem, onCle
                 <input required placeholder="Nome Completo" className="w-full border p-3 rounded mb-2 bg-gray-50" />
                 <input required placeholder="CEP" className="w-full border p-3 rounded mb-2 bg-gray-50" />
                 <input required placeholder="Endereço" className="w-full border p-3 rounded bg-gray-50" />
+                
+                <div className="mt-2 p-3 bg-blue-50 border border-blue-100 rounded-lg flex justify-between items-center">
+                   <span className="text-sm text-blue-800 font-bold">Frete Expresso (SP)</span>
+                   <span className="text-sm text-blue-800">Grátis</span>
+                </div>
               </div>
               <div className="pt-4">
                 <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2"><CreditCard size={18} /> Pagamento</h3>

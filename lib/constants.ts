@@ -212,6 +212,7 @@ CREATE TABLE IF NOT EXISTS orders (
   total NUMERIC NOT NULL,
   status TEXT DEFAULT 'pending',
   tracking_code TEXT,
+  shipping_method TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   items JSONB
 );
@@ -220,4 +221,5 @@ CREATE TABLE IF NOT EXISTS orders (
 -- ALTER TABLE products ADD COLUMN IF NOT EXISTS images TEXT[];
 -- ALTER TABLE products ADD COLUMN IF NOT EXISTS details JSONB;
 -- ALTER TABLE orders ADD COLUMN IF NOT EXISTS tracking_code TEXT;
+-- ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipping_method TEXT;
 `;
