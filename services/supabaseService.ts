@@ -180,6 +180,16 @@ export const fetchOrders = async (): Promise<Order[]> => {
   return data as Order[];
 };
 
+export const updateOrder = async (id: string, updates: Partial<Order>): Promise<boolean> => {
+  if (!supabase) return false;
+  const { error } = await supabase.from('orders').update(updates).eq('id', id);
+  if (error) {
+    handleDbError('updateOrder', error);
+    return false;
+  }
+  return true;
+};
+
 export const fetchOrdersByDocument = async (document: string): Promise<Order[]> => {
   if (!supabase) return [];
   // Remove non-numeric characters for cleaner search if needed, but assuming exact match for now
