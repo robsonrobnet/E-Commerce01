@@ -3,6 +3,8 @@ export interface Product {
   name: string;
   description: string;
   price: number;
+  promotional_price?: number; // Preço "Por"
+  cost_price?: number; // Preço de Custo (Interno)
   stock: number;
   category: string;
   image_url: string;
@@ -30,6 +32,7 @@ export interface CartItem extends Product {
 export interface Order {
   id: string;
   customer_name: string;
+  customer_document?: string; // CPF or CNPJ for tracking
   total: number;
   status: 'pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled';
   tracking_code?: string;
@@ -55,6 +58,21 @@ export interface MarketingCampaign {
   channel: 'instagram' | 'email' | 'whatsapp';
   status: 'active' | 'draft' | 'completed';
   ai_generated: boolean;
+}
+
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'model' | 'system' | 'tool'; // Added 'tool' role
+  text: string;
+  timestamp: Date;
+}
+
+export interface WebhookPayload {
+  event: 'chat_handover';
+  timestamp: string;
+  department: string;
+  customerSessionId: string;
+  history: ChatMessage[];
 }
 
 export enum Page {

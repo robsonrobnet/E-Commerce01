@@ -16,7 +16,11 @@ const Cart: React.FC<CartProps> = ({ items, isOpen, onClose, onRemoveItem, onCle
   const [step, setStep] = useState<'cart' | 'checkout' | 'success'>('cart');
   const [loading, setLoading] = useState(false);
 
-  const total = items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+  // Use promotional price if available
+  const total = items.reduce((acc, item) => {
+    const price = item.promotional_price || item.price;
+    return acc + (price * item.quantity);
+  }, 0);
 
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,22 +75,25 @@ const Cart: React.FC<CartProps> = ({ items, isOpen, onClose, onRemoveItem, onCle
               </div>
             ) : (
               <div className="space-y-4">
-                {items.map(item => (
-                  <div key={item.id} className="flex gap-4 border-b border-gray-100 pb-4">
-                    <img src={item.image_url} alt={item.name} className="w-20 h-20 rounded-lg object-cover bg-gray-100" />
-                    <div className="flex-1">
-                      <h4 className="font-bold text-gray-800 text-sm">{item.name}</h4>
-                      <p className="text-xs text-gray-500 mb-2">{item.category}</p>
-                      <div className="flex justify-between items-center">
-                        <span className="font-bold text-primary">R$ {item.price.toFixed(2)}</span>
-                        <div className="flex items-center gap-3">
-                           <span className="text-sm text-gray-600">x{item.quantity}</span>
-                           <button onClick={() => onRemoveItem(item.id)} className="text-red-400 hover:text-red-600"><Trash2 size={16} /></button>
+                {items.map(item => {
+                    const price = item.promotional_price || item.price;
+                    return (
+                      <div key={item.id} className="flex gap-4 border-b border-gray-100 pb-4">
+                        <img src={item.image_url} alt={item.name} className="w-20 h-20 rounded-lg object-cover bg-gray-100" />
+                        <div className="flex-1">
+                          <h4 className="font-bold text-gray-800 text-sm">{item.name}</h4>
+                          <p className="text-xs text-gray-500 mb-2">{item.category}</p>
+                          <div className="flex justify-between items-center">
+                            <span className="font-bold text-primary">R$ {price.toFixed(2)}</span>
+                            <div className="flex items-center gap-3">
+                              <span className="text-sm text-gray-600">x{item.quantity}</span>
+                              <button onClick={() => onRemoveItem(item.id)} className="text-red-400 hover:text-red-600"><Trash2 size={16} /></button>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                ))}
+                    );
+                })}
               </div>
             )
           )}

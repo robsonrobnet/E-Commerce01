@@ -34,7 +34,9 @@ export const INITIAL_PRODUCTS: Product[] = [
     id: '1',
     name: 'Caderno Inteligente A5 Rose Pastel Original',
     description: 'O Caderno Inteligente A5 Rose é a revolução da papelaria moderna. Com sistema de discos que permite reposicionar folhas, ele é perfeito para estudantes da USP, profissionais da Faria Lima e amantes de Bullet Journal. Sua capa dura em tom rosa pastel traz elegância e durabilidade.',
-    price: 89.90,
+    price: 119.90,
+    promotional_price: 89.90,
+    cost_price: 45.00,
     stock: 25,
     category: 'Cadernos',
     image_url: 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&q=80&w=800',
@@ -190,6 +192,8 @@ CREATE TABLE IF NOT EXISTS products (
   name TEXT NOT NULL,
   description TEXT,
   price NUMERIC NOT NULL,
+  promotional_price NUMERIC, -- Preço promocional
+  cost_price NUMERIC, -- Preço de custo
   stock INTEGER DEFAULT 0,
   category TEXT,
   image_url TEXT,
@@ -209,6 +213,7 @@ CREATE TABLE IF NOT EXISTS categories (
 CREATE TABLE IF NOT EXISTS orders (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   customer_name TEXT NOT NULL,
+  customer_document TEXT, -- CPF ou CNPJ
   total NUMERIC NOT NULL,
   status TEXT DEFAULT 'pending',
   tracking_code TEXT,
@@ -220,6 +225,9 @@ CREATE TABLE IF NOT EXISTS orders (
 -- Atualizações de Schema (Executar caso as tabelas já existam):
 -- ALTER TABLE products ADD COLUMN IF NOT EXISTS images TEXT[];
 -- ALTER TABLE products ADD COLUMN IF NOT EXISTS details JSONB;
+-- ALTER TABLE products ADD COLUMN IF NOT EXISTS promotional_price NUMERIC;
+-- ALTER TABLE products ADD COLUMN IF NOT EXISTS cost_price NUMERIC;
 -- ALTER TABLE orders ADD COLUMN IF NOT EXISTS tracking_code TEXT;
 -- ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipping_method TEXT;
+-- ALTER TABLE orders ADD COLUMN IF NOT EXISTS customer_document TEXT;
 `;

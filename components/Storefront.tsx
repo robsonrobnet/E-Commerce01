@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { ShoppingCart, Heart, ArrowRight, MessageCircle, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
+import { ShoppingCart, Heart, ArrowRight, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
 import { Product, Category } from '../types';
 import { fetchProducts, fetchCategories } from '../services/supabaseService';
 import { INITIAL_PRODUCTS, INITIAL_CATEGORIES } from '../lib/constants';
+import ChatWidget from './ChatWidget';
 
 interface StorefrontProps {
   onAddToCart: (product: Product) => void;
@@ -45,6 +46,11 @@ const ProductCard: React.FC<{ product: Product; onAddToCart: (p: Product) => voi
     e.stopPropagation();
     setCurrentImageIndex(index);
   }
+
+  // Calculate Discount Logic
+  const hasPromo = product.promotional_price && product.promotional_price < product.price;
+  const discountPercent = hasPromo ? Math.round(((product.price - (product.promotional_price || 0)) / product.price) * 100) : 0;
+  const finalPrice = product.promotional_price || product.price;
 
   return (
     <div 
@@ -95,11 +101,18 @@ const ProductCard: React.FC<{ product: Product; onAddToCart: (p: Product) => voi
             <button className="bg-white p-2 rounded-full shadow-lg text-gray-400 hover:text-blue-500 transition"><Eye size={18} /></button>
         </div>
         
-        {product.featured && (
-            <span className="absolute top-3 left-3 bg-white/90 backdrop-blur text-primary text-xs font-bold px-3 py-1 rounded-full shadow-sm uppercase tracking-wide z-10">
-                Destaque
-            </span>
-        )}
+        <div className="absolute top-3 left-3 flex flex-col gap-1 items-start z-10">
+            {product.featured && (
+                <span className="bg-white/90 backdrop-blur text-primary text-[10px] font-bold px-2 py-1 rounded-full shadow-sm uppercase tracking-wide">
+                    Destaque
+                </span>
+            )}
+            {hasPromo && (
+                <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-sm">
+                    -{discountPercent}% OFF
+                </span>
+            )}
+        </div>
       </div>
       
       {/* Product Details */}
@@ -109,7 +122,12 @@ const ProductCard: React.FC<{ product: Product; onAddToCart: (p: Product) => voi
           <p className="text-sm text-gray-500 line-clamp-2 mb-4 flex-1">{product.description}</p>
           
           <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-50">
-              <span className="text-xl font-bold text-gray-900">R$ {product.price.toFixed(2)}</span>
+              <div className="flex flex-col">
+                  {hasPromo && <span className="text-xs text-gray-400 line-through">R$ {product.price.toFixed(2)}</span>}
+                  <span className={`text-xl font-bold ${hasPromo ? 'text-red-600' : 'text-gray-900'}`}>
+                      R$ {finalPrice.toFixed(2)}
+                  </span>
+              </div>
               <button 
                   onClick={(e) => { e.stopPropagation(); onAddToCart(product); }}
                   className="bg-gray-900 text-white p-3 rounded-xl hover:bg-primary transition active:scale-95 shadow-md flex items-center gap-2"
@@ -238,17 +256,8 @@ const Storefront: React.FC<StorefrontProps> = ({ onAddToCart, onViewProduct, use
         )}
       </div>
 
-      {/* Floating WhatsApp Button */}
-      <a 
-        href="https://wa.me/5511999999999" // Replace with real number
-        target="_blank" 
-        rel="noopener noreferrer"
-        className="fixed bottom-6 right-6 bg-[#25D366] text-white p-4 rounded-full shadow-2xl hover:bg-[#128C7E] transition transform hover:scale-110 z-50 flex items-center gap-2"
-        title="Falar no WhatsApp"
-      >
-        <MessageCircle size={28} />
-        <span className="hidden md:inline font-bold">Dúvidas?</span>
-      </a>
+      {/* Chat Widget Replaces Simple Link */}
+      <ChatWidget />
 
       {/* Footer Simple */}
       <footer className="bg-gray-900 text-white py-12 mt-20">

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Save, CheckCircle, XCircle, Database, Bot, Copy, Bell, Mail, MessageCircle, AlertTriangle, Loader2 } from 'lucide-react';
+import { Save, CheckCircle, XCircle, Database, Copy, Bell, Mail, MessageCircle, AlertTriangle, Loader2 } from 'lucide-react';
 import { DbConfig } from '../types';
 import { initSupabase, checkConnection } from '../services/supabaseService';
 import { SQL_SETUP_SCRIPT } from '../lib/constants';
@@ -13,7 +13,6 @@ interface AdminSettingsProps {
 
 const AdminSettings: React.FC<AdminSettingsProps> = ({ dbConfig, onSaveDbConfig, isConnected }) => {
   const [localConfig, setLocalConfig] = useState<DbConfig>(dbConfig);
-  const [apiKey, setApiKey] = useState('');
   const [testStatus, setTestStatus] = useState<'idle' | 'checking' | 'success' | 'error'>('idle');
   
   // Notification State
@@ -26,9 +25,6 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ dbConfig, onSaveDbConfig,
   const [alertSending, setAlertSending] = useState(false);
 
   useEffect(() => {
-    const storedKey = localStorage.getItem('GEMINI_API_KEY');
-    if (storedKey) setApiKey(storedKey);
-
     // Load saved contact info
     const savedContact = localStorage.getItem('ADMIN_CONTACT_INFO');
     if (savedContact) {
@@ -84,11 +80,6 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ dbConfig, onSaveDbConfig,
     alert('Falha detectada! Alertas de sistema foram enviados para o administrador.');
   };
 
-  const handleSaveAi = () => {
-    localStorage.setItem('GEMINI_API_KEY', apiKey);
-    alert('Chave da API Gemini salva com sucesso!');
-  };
-
   const copySql = () => {
     navigator.clipboard.writeText(SQL_SETUP_SCRIPT);
     alert('SQL copiado para a área de transferência!');
@@ -100,7 +91,7 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ dbConfig, onSaveDbConfig,
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
-        {/* Left Column: Database & AI */}
+        {/* Left Column: Database */}
         <div className="space-y-8">
           {/* Database Section */}
           <div className="bg-white p-6 rounded-xl shadow-sm border border-pastel-purple">
@@ -166,33 +157,6 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ dbConfig, onSaveDbConfig,
                  </div>
                )
             ))}
-          </div>
-
-          {/* AI Section */}
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-pastel-blue">
-            <div className="flex items-center gap-3 mb-4">
-              <Bot className="text-blue-600" />
-              <h3 className="text-xl font-bold text-gray-800">Integração IA (Gemini)</h3>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Google Gemini API Key</label>
-              <div className="flex gap-2">
-                 <input
-                  type="password"
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  className="flex-1 p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-400 outline-none"
-                  placeholder="AIzaSy..."
-                />
-                <button
-                  onClick={handleSaveAi}
-                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-                >
-                  Salvar
-                </button>
-              </div>
-            </div>
           </div>
         </div>
 

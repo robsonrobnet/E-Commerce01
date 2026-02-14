@@ -155,6 +155,7 @@ export const createOrder = async (order: Omit<Order, 'id' | 'created_at'>): Prom
   if (!supabase) return false;
   const { error } = await supabase.from('orders').insert([{
     customer_name: order.customer_name,
+    customer_document: order.customer_document,
     total: order.total,
     status: order.status,
     tracking_code: order.tracking_code,
@@ -174,6 +175,25 @@ export const fetchOrders = async (): Promise<Order[]> => {
   const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
   if (error) {
     handleDbError('fetchOrders', error);
+    return [];
+  }
+  return data as Order[];
+};
+
+export const fetchOrdersByDocument = async (document: string): Promise<Order[]> => {
+  if (!supabase) return [];
+  // Remove non-numeric characters for cleaner search if needed, but assuming exact match for now
+  const cleanDoc = document.replace(/\D/g, '');
+  
+  // Try searching both exact match or clean match if stored differently
+  const { data, error } = await supabase
+    .from('orders')
+    .select('*')
+    .ilike('customer_document', `%${cleanDoc}%`) // Loose search to help find even if formatted differently
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    handleDbError('fetchOrdersByDocument', error);
     return [];
   }
   return data as Order[];

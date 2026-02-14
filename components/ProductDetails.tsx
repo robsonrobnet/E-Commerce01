@@ -26,8 +26,13 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, onAddToCart, o
     { label: "Disponibilidade", value: product.stock > 0 ? "Em Estoque" : "Sob Encomenda" }
   ];
 
+  // Pricing Logic
+  const hasPromo = product.promotional_price && product.promotional_price < product.price;
+  const currentPrice = product.promotional_price || product.price;
+  const discountPercent = hasPromo ? Math.round(((product.price - currentPrice) / product.price) * 100) : 0;
+
   const installments = 3;
-  const installmentValue = (product.price / installments).toFixed(2);
+  const installmentValue = (currentPrice / installments).toFixed(2);
 
   const nextImage = () => setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
   const prevImage = () => setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
@@ -63,6 +68,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, onAddToCart, o
                 </>
               )}
               {product.featured && <div className="absolute top-4 left-4 bg-primary text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest shadow-lg">Destaque SP</div>}
+              {hasPromo && <div className="absolute top-4 right-4 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest shadow-lg">-{discountPercent}% OFF</div>}
             </div>
             
             {/* Thumbnails */}
@@ -103,9 +109,13 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, onAddToCart, o
             </div>
 
             <div className="bg-gradient-to-br from-gray-50 to-white p-6 rounded-2xl border border-gray-100 mb-8 shadow-sm">
-               <p className="text-gray-400 text-sm mb-1 line-through">De: R$ {(product.price * 1.2).toFixed(2)}</p>
+               {hasPromo && (
+                 <p className="text-gray-400 text-sm mb-1 line-through">De: R$ {product.price.toFixed(2)}</p>
+               )}
                <div className="flex items-end gap-2 mb-2">
-                  <span className="text-4xl font-bold text-primary">R$ {product.price.toFixed(2)}</span>
+                  <span className={`text-4xl font-bold ${hasPromo ? 'text-red-600' : 'text-primary'}`}>
+                      R$ {currentPrice.toFixed(2)}
+                  </span>
                   <span className="text-sm text-green-600 font-bold mb-1 bg-green-50 px-2 py-0.5 rounded">5% OFF no PIX</span>
                </div>
                <div className="text-sm text-gray-600 flex items-center gap-2">
