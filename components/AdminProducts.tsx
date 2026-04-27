@@ -144,12 +144,18 @@ const AdminProducts: React.FC<AdminProductsProps> = ({ useMockData }) => {
       ...formData,
       images: processedImages,
       image_url: mainImage,
-      // Ensure prices are numbers
-      price: Number(formData.price),
-      promotional_price: formData.promotional_price ? Number(formData.promotional_price) : null,
-      cost_price: formData.cost_price ? Number(formData.cost_price) : null,
-      stock: Number(formData.stock)
+      // Ensure prices are numbers and handle potential NaN
+      price: Number(formData.price) || 0,
+      promotional_price: (formData.promotional_price && !isNaN(Number(formData.promotional_price))) ? Number(formData.promotional_price) : null,
+      cost_price: (formData.cost_price && !isNaN(Number(formData.cost_price))) ? Number(formData.cost_price) : null,
+      stock: Number(formData.stock) || 0,
+      updated_at: new Date().toISOString()
     };
+
+    if (finalData.price <= 0) {
+      alert("Preço deve ser maior que zero.");
+      return;
+    }
 
     if (useMockData) {
       alert("Operações de escrita desabilitadas no modo Demo (sem banco conectado).");
@@ -383,16 +389,20 @@ const AdminProducts: React.FC<AdminProductsProps> = ({ useMockData }) => {
 
               {/* Section 4: Image Manager */}
               <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                <h4 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-                    <ImageIcon size={16}/> Galeria de Imagens
-                 </h4>
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-sm font-bold text-gray-500 uppercase tracking-wide flex items-center gap-2">
+                      <ImageIcon size={16}/> Galeria de Imagens
+                  </h4>
+                  <div className="text-[10px] text-gray-400">Arraste para mudar a ordem. A primeira é a principal.</div>
+                </div>
                  
                  {/* Input Area */}
-                 <div className="flex flex-col md:flex-row gap-4 mb-6">
-                    <div className="flex-1 border-2 border-dashed border-gray-300 rounded-lg p-4 flex flex-col items-center justify-center text-gray-500 hover:bg-gray-50 hover:border-primary transition cursor-pointer relative">
-                        <Upload size={24} className="mb-2"/>
-                        <span className="text-sm font-bold">Upload de Arquivo</span>
-                        <span className="text-xs">Clique para selecionar</span>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 flex flex-col items-center justify-center text-gray-500 hover:bg-gray-50 hover:border-primary transition cursor-pointer relative group">
+                        <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3 group-hover:bg-primary-50 group-hover:text-primary transition-colors">
+                            <Upload size={20} />
+                        </div>
+                        <span className="text-xs font-bold uppercase tracking-widest">Upload Local</span>
                         <input 
                             type="file" 
                             accept="image/*" 
@@ -401,54 +411,61 @@ const AdminProducts: React.FC<AdminProductsProps> = ({ useMockData }) => {
                             onChange={handleFileUpload}
                         />
                     </div>
-                    <div className="flex-1 flex flex-col gap-2">
-                         <label className="text-xs font-bold text-gray-500">Ou adicione por URL:</label>
+                    <div className="bg-gray-50 p-6 rounded-xl border border-gray-100 flex flex-col justify-center">
+                         <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Adicionar por URL</label>
                          <div className="flex gap-2">
                              <input 
-                                className="flex-1 bg-white border border-gray-300 p-2 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none" 
-                                placeholder="https://..."
+                                className="flex-1 bg-white border border-gray-200 p-2.5 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none shadow-inner" 
+                                placeholder="https://exemplo.com/imagem.jpg"
                                 value={imageUrlInput}
                                 onChange={(e) => setImageUrlInput(e.target.value)}
                              />
-                             <button type="button" onClick={handleAddImageUrl} className="bg-gray-100 hover:bg-gray-200 px-4 rounded-lg font-bold text-gray-600">+</button>
+                             <button type="button" onClick={handleAddImageUrl} className="bg-primary text-white px-4 rounded-lg font-bold hover:bg-primary-900 transition shadow-sm">+</button>
                          </div>
                     </div>
                  </div>
 
                  {/* Gallery Grid */}
                  {localImages.length > 0 ? (
-                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
                         {localImages.map((img, idx) => (
-                            <div key={idx} className={`relative group aspect-square rounded-lg overflow-hidden border-2 transition ${idx === 0 ? 'border-primary ring-2 ring-primary/20' : 'border-gray-200'}`}>
-                                <img src={img} className="w-full h-full object-cover bg-gray-50" alt={`Prod ${idx}`} />
+                            <div key={idx} className={`relative group aspect-square rounded-xl overflow-hidden border-2 transition-all ${idx === 0 ? 'border-primary shadow-md' : 'border-gray-100 hover:border-primary-200'}`}>
+                                <img src={img} className="w-full h-full object-cover bg-white" alt={`Prod ${idx}`} />
                                 
                                 {/* Overlay Actions */}
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex flex-col items-center justify-center gap-2">
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-2 backdrop-blur-[2px]">
                                     {idx !== 0 && (
                                         <button 
                                             type="button" 
                                             onClick={() => handleSetMainImage(idx)}
-                                            className="bg-white text-yellow-500 p-1.5 rounded-full shadow-lg hover:scale-110 transition"
+                                            className="bg-white text-yellow-500 p-2 rounded-lg shadow-lg hover:bg-yellow-50 transition"
                                             title="Definir como Principal"
                                         >
-                                            <Star size={16} fill="currentColor"/>
+                                            <Star size={14} fill="currentColor"/>
                                         </button>
                                     )}
                                     <button 
                                         type="button" 
                                         onClick={() => handleRemoveImage(idx)}
-                                        className="bg-white text-red-500 p-1.5 rounded-full shadow-lg hover:scale-110 transition"
+                                        className="bg-white text-red-500 p-2 rounded-lg shadow-lg hover:bg-red-50 transition"
                                         title="Remover"
                                     >
-                                        <Trash2 size={16}/>
+                                        <Trash2 size={14}/>
                                     </button>
                                 </div>
-                                {idx === 0 && <span className="absolute top-1 left-1 bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded shadow">Principal</span>}
+                                {idx === 0 && (
+                                  <div className="absolute top-0 right-0 p-1">
+                                    <div className="bg-primary text-white text-[8px] font-bold px-2 py-0.5 rounded-bl-lg uppercase tracking-tighter">Capa</div>
+                                  </div>
+                                )}
                             </div>
                         ))}
                     </div>
                  ) : (
-                    <div className="text-center py-4 text-gray-400 text-sm">Nenhuma imagem adicionada.</div>
+                    <div className="text-center py-10 bg-gray-50/50 rounded-xl border border-dashed border-gray-200">
+                        <ImageIcon className="mx-auto text-gray-300 mb-2" size={32} />
+                        <div className="text-gray-400 text-xs font-medium uppercase tracking-widest leading-relaxed">Arraste imagens ou insira URLs <br/> para compor sua galeria</div>
+                    </div>
                  )}
               </div>
 

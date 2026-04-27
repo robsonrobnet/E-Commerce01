@@ -11,7 +11,7 @@ export const generateProductDescription = async (productName: string, category: 
     throw new Error("Gemini API Key não configurada no ambiente.");
   }
 
-  const genAI = new GoogleGenAI(apiKey);
+  const genAI = new GoogleGenAI({ apiKey });
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
   try {
@@ -52,7 +52,7 @@ export const chatWithStoreAgent = async (history: ChatMessage[], newUserMessage:
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) return "Desculpe, estou em manutenção no momento (API Key missing).";
   
-    const genAI = new GoogleGenAI(apiKey);
+    const genAI = new GoogleGenAI({ apiKey });
     const model = genAI.getGenerativeModel({ 
       model: "gemini-1.5-flash",
       systemInstruction: `

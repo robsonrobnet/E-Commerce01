@@ -250,8 +250,8 @@ const Storefront: React.FC<StorefrontProps> = ({ onAddToCart, onViewProduct, use
           className="relative z-10 text-center px-6 max-w-4xl mx-auto"
         >
           <motion.span 
-            initial={{ opacity: 0, tracking: '0.2em' }} 
-            animate={{ opacity: 1, tracking: '0.5em' }}
+            initial={{ opacity: 0, letterSpacing: '0.2em' }} 
+            animate={{ opacity: 1, letterSpacing: '0.5em' }}
             className="text-primary-600 font-bold uppercase mb-8 block font-sans text-sm"
           >
             Nova Coleção 2025

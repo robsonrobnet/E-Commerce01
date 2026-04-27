@@ -3,6 +3,16 @@ import { Product, Order, DbConfig, Category } from '../types';
 import { sendSystemAlert } from './notificationService';
 
 let supabase: SupabaseClient | null = null;
+const requestLog: Map<string, number> = new Map();
+
+// --- SECURITY HELPER: RATE LIMITER ---
+const checkRateLimit = (key: string, limit: number = 30, windowMs: number = 60000): boolean => {
+  const now = Date.now();
+  const timestamps = Array.from(requestLog.values()).filter(t => now - t < windowMs);
+  if (timestamps.length >= limit) return false;
+  requestLog.set(`${key}-${now}`, now);
+  return true;
+};
 
 // --- ERROR MONITORING HELPER ---
 const handleDbError = async (context: string, error: any) => {
@@ -153,6 +163,13 @@ export const deleteCategory = async (id: string): Promise<boolean> => {
 
 export const createOrder = async (order: Omit<Order, 'id' | 'created_at'>): Promise<boolean> => {
   if (!supabase) return false;
+
+  // SECURITY: Rate limit order creation to prevent spam/attacks
+  if (!checkRateLimit('createOrder', 5, 300000)) {
+    alert("Limite de segurança atingido. Aguarde alguns minutos antes de tentar novamente.");
+    return false;
+  }
+
   const { error } = await supabase.from('orders').insert([{
     customer_name: order.customer_name,
     customer_document: order.customer_document,

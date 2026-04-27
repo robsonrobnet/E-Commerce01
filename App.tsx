@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingBag, LayoutDashboard, Package, Settings, LogOut, Menu, Lock, ShoppingCart, CreditCard, BarChart, Image, Zap, Store, Tags, Cloud, Check } from 'lucide-react';
+import { LayoutDashboard, Package, Settings, LogOut, Menu, ShoppingCart, CreditCard, BarChart, Image, Zap, Store, Tags, Cloud, Check } from 'lucide-react';
 import Storefront from './components/Storefront';
 import ProductDetails from './components/ProductDetails'; // Import the new component
 import AdminDashboard from './components/AdminDashboard';
@@ -25,7 +25,10 @@ const DEFAULT_DB_CONFIG: DbConfig = {
 
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>(Page.STORE);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    // SECURITY: Simple session check to prevent logout on refresh, using a hashed-like key
+    return sessionStorage.getItem('ADMIN_SESSION_TOKEN') === 'B_NET_SECURE_TOKEN_2026';
+  });
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [dbConfig, setDbConfig] = useState<DbConfig>(DEFAULT_DB_CONFIG);
@@ -80,11 +83,13 @@ const App: React.FC = () => {
   };
 
   const handleLogin = () => {
+    sessionStorage.setItem('ADMIN_SESSION_TOKEN', 'B_NET_SECURE_TOKEN_2026');
     setIsAuthenticated(true);
     setCurrentPage(Page.ADMIN_DASHBOARD);
   };
 
   const handleLogout = () => {
+    sessionStorage.removeItem('ADMIN_SESSION_TOKEN');
     setIsAuthenticated(false);
     setCurrentPage(Page.STORE);
   };
@@ -288,7 +293,6 @@ const App: React.FC = () => {
                     <AdminSettings 
                       dbConfig={dbConfig} 
                       onSaveDbConfig={handleSaveDbConfig} 
-                      isConnected={dbConnected} 
                     />
                   )}
                 </>

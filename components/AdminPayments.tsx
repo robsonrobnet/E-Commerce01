@@ -136,10 +136,22 @@ const AdminPayments: React.FC = () => {
            <h3 className="font-display text-xl font-medium text-gray-900 italic serif mb-8">Métodos</h3>
            <div className="h-64 w-full">
              <ResponsiveContainer width="100%" height="100%">
-               <RechartsPie data={pieData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={10} dataKey="value">
-                 {pieData.map((entry, index) => (
-                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} cornerRadius={5} />
-                 ))}
+               <RechartsPie>
+                 <Pie 
+                   data={pieData} 
+                   cx="50%" 
+                   cy="50%" 
+                   innerRadius={60} 
+                   outerRadius={80} 
+                   paddingAngle={5} 
+                   dataKey="value"
+                   stroke="none"
+                 >
+                   {pieData.map((_, index) => (
+                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                   ))}
+                 </Pie>
+                 <Tooltip />
                </RechartsPie>
              </ResponsiveContainer>
            </div>

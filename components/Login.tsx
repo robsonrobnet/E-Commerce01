@@ -9,14 +9,32 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [attempts, setAttempts] = useState(0);
+  const [isLocked, setIsLocked] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Hardcoded credentials as requested
+    
+    if (isLocked) {
+      setError('Muitas tentativas. Tente novamente mais tarde.');
+      return;
+    }
+
+    // SECURITY: Basic brute force protection
     if (username === 'Admin' && password === '2298R@bnet') {
       onLogin();
     } else {
+      const newAttempts = attempts + 1;
+      setAttempts(newAttempts);
       setError('Credenciais inválidas. Tente novamente.');
+      
+      if (newAttempts >= 5) {
+        setIsLocked(true);
+        setTimeout(() => {
+          setIsLocked(false);
+          setAttempts(0);
+        }, 30000); // 30 seconds lockout
+      }
     }
   };
 

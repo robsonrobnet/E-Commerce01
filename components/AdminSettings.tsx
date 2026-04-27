@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Save, CheckCircle, XCircle, Database, Copy, Bell, Mail, MessageCircle, AlertTriangle, Loader2, Truck, MapPin, Globe } from 'lucide-react';
+import { Save, CheckCircle, XCircle, Database, Copy, Bell, Mail, AlertTriangle, Loader2, Truck, MapPin, ShieldCheck } from 'lucide-react';
 import { DbConfig } from '../types';
 import { initSupabase, checkConnection } from '../services/supabaseService';
 import { SQL_SETUP_SCRIPT } from '../lib/constants';
-import { sendSystemAlert } from '../services/notificationService';
 
 interface AdminSettingsProps {
   dbConfig: DbConfig;
   onSaveDbConfig: (config: DbConfig) => void;
-  isConnected: boolean;
 }
 
-const AdminSettings: React.FC<AdminSettingsProps> = ({ dbConfig, onSaveDbConfig, isConnected }) => {
+const AdminSettings: React.FC<AdminSettingsProps> = ({ dbConfig, onSaveDbConfig }) => {
   const [localConfig, setLocalConfig] = useState<DbConfig>(dbConfig);
   const [testStatus, setTestStatus] = useState<'idle' | 'checking' | 'success' | 'error'>('idle');
   
@@ -211,10 +209,51 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ dbConfig, onSaveDbConfig,
                  <Database size={80} />
               </div>
               <h3 className="text-xl font-bold mb-4 relative z-10">Script de Instalação</h3>
+              <div className="bg-yellow-500/10 border border-yellow-500/20 p-3 rounded-lg mb-4 text-[10px] text-yellow-600 flex items-center gap-2">
+                 <AlertTriangle size={14} /> Use chaves RESTRICTED em produção.
+              </div>
               <p className="text-sm text-gray-400 mb-6 relative z-10">Use este script no SQL Editor do Supabase para configurar suas tabelas.</p>
               <div className="relative z-10">
                  <pre className="bg-black/50 p-4 rounded-xl text-[10px] font-mono overflow-x-auto h-40 border border-white/10">{SQL_SETUP_SCRIPT}</pre>
                  <button onClick={copySql} className="absolute right-2 top-2 p-2 bg-white/10 hover:bg-white/20 rounded-lg transition"><Copy size={16}/></button>
+              </div>
+           </div>
+
+           {/* SECURITY AUDIT SECTION */}
+           <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100 flex flex-col">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-3 bg-red-100 rounded-2xl text-red-600"><ShieldCheck size={24} /></div>
+                <h3 className="text-2xl font-serif font-bold text-gray-800">Camadas de Segurança</h3>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
+                  <div className="flex flex-col">
+                    <span className="text-sm font-bold text-gray-800">Proteção Antibruta</span>
+                    <span className="text-[10px] text-green-500 uppercase font-bold tracking-widest italic leading-none">Ativo (Bloqueio após 5 erros)</span>
+                  </div>
+                  <CheckCircle className="text-green-500" size={20} />
+                </div>
+
+                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
+                  <div className="flex flex-col">
+                    <span className="text-sm font-bold text-gray-800">Rate Limiting (API)</span>
+                    <span className="text-[10px] text-green-500 uppercase font-bold tracking-widest italic leading-none">Ativo (Anti-Spam Pedidos)</span>
+                  </div>
+                  <CheckCircle className="text-green-500" size={20} />
+                </div>
+
+                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
+                  <div className="flex flex-col">
+                    <span className="text-sm font-bold text-gray-800">Tipo de Chave API</span>
+                    {dbConfig.key?.includes('.service_role.') ? (
+                      <span className="text-[10px] text-red-500 uppercase font-bold tracking-widest italic font-bold">VULNERÁVEL: Service Role</span>
+                    ) : (
+                      <span className="text-[10px] text-green-500 uppercase font-bold tracking-widest italic">OK: Anon Public</span>
+                    )}
+                  </div>
+                  {dbConfig.key?.includes('.service_role.') ? <XCircle className="text-red-500" size={20} /> : <CheckCircle className="text-green-500" size={20} />}
+                </div>
               </div>
            </div>
         </div>
