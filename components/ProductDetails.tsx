@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft, ShoppingCart, Heart, ShieldCheck, Truck, CreditCard, ChevronLeft, ChevronRight, Star, Share2 } from 'lucide-react';
 import { Product } from '../types';
+import { formatCurrency } from '../lib/utils';
 
 interface ProductDetailsProps {
   product: Product;
@@ -32,7 +33,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, onAddToCart, o
   const discountPercent = hasPromo ? Math.round(((product.price - currentPrice) / product.price) * 100) : 0;
 
   const installments = 3;
-  const installmentValue = (currentPrice / installments).toFixed(2);
+  const installmentValue = currentPrice / installments;
 
   const nextImage = () => setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
   const prevImage = () => setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
@@ -110,17 +111,17 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, onAddToCart, o
 
             <div className="bg-gradient-to-br from-gray-50 to-white p-6 rounded-2xl border border-gray-100 mb-8 shadow-sm">
                {hasPromo && (
-                 <p className="text-gray-400 text-sm mb-1 line-through">De: R$ {product.price.toFixed(2)}</p>
+                 <p className="text-gray-400 text-sm mb-1 line-through">De: {formatCurrency(product.price)}</p>
                )}
                <div className="flex items-end gap-2 mb-2">
                   <span className={`text-4xl font-bold ${hasPromo ? 'text-red-600' : 'text-primary'}`}>
-                      R$ {currentPrice.toFixed(2)}
+                      {formatCurrency(currentPrice)}
                   </span>
                   <span className="text-sm text-green-600 font-bold mb-1 bg-green-50 px-2 py-0.5 rounded">5% OFF no PIX</span>
                </div>
                <div className="text-sm text-gray-600 flex items-center gap-2">
                   <CreditCard size={16} />
-                  <span>Em até <strong>{installments}x de R$ {installmentValue}</strong> sem juros</span>
+                  <span>Em até <strong>{installments}x de {formatCurrency(installmentValue)}</strong> sem juros</span>
                </div>
             </div>
 

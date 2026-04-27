@@ -5,14 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Papelaria Encantada</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
     <script>
       tailwind.config = {
         theme: {
           extend: {
             fontFamily: {
-              sans: ['Nunito', 'sans-serif'],
-              serif: ['Playfair Display', 'serif'],
+              sans: ['Inter', 'sans-serif'],
+              serif: ['Libre Baskerville', 'serif'],
+              display: ['Cormorant Garamond', 'serif'],
             },
             colors: {
               pastel: {
@@ -22,8 +23,35 @@
                 purple: '#E9D5DA',
                 green: '#D9EDBF',
               },
-              primary: '#6B4C74',
-              secondary: '#455A64'
+              primary: {
+                DEFAULT: '#6B4C74',
+                50: '#F5F2F6',
+                100: '#EBE5ED',
+                200: '#D1C2D6',
+                300: '#B79FBF',
+                400: '#9D7CA8',
+                500: '#6B4C74',
+                600: '#5A4062',
+                700: '#49344F',
+                800: '#38283D',
+                900: '#271C2A',
+              },
+              secondary: '#455A64',
+              accent: '#E6D5B8'
+            },
+            animation: {
+              'parallax': 'parallax 10s ease-in-out infinite alternate',
+              'float': 'float 6s ease-in-out infinite',
+            },
+            keyframes: {
+              parallax: {
+                '0%': { transform: 'translateY(0)' },
+                '100%': { transform: 'translateY(-20px)' },
+              },
+              float: {
+                '0%, 100%': { transform: 'translateY(0)' },
+                '50%': { transform: 'translateY(-10px)' },
+              }
             }
           }
         }

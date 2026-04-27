@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, Trash2, CreditCard, Truck } from 'lucide-react';
 import { CartItem } from '../types';
 import { createOrder } from '../services/supabaseService';
+import { formatCurrency } from '../lib/utils';
 
 interface CartProps {
   items: CartItem[];
@@ -84,7 +85,7 @@ const Cart: React.FC<CartProps> = ({ items, isOpen, onClose, onRemoveItem, onCle
                           <h4 className="font-bold text-gray-800 text-sm">{item.name}</h4>
                           <p className="text-xs text-gray-500 mb-2">{item.category}</p>
                           <div className="flex justify-between items-center">
-                            <span className="font-bold text-primary">R$ {price.toFixed(2)}</span>
+                            <span className="font-bold text-primary">{formatCurrency(price)}</span>
                             <div className="flex items-center gap-3">
                               <span className="text-sm text-gray-600">x{item.quantity}</span>
                               <button onClick={() => onRemoveItem(item.id)} className="text-red-400 hover:text-red-600"><Trash2 size={16} /></button>
@@ -141,7 +142,7 @@ const Cart: React.FC<CartProps> = ({ items, isOpen, onClose, onRemoveItem, onCle
           <div className="p-5 border-t bg-gray-50">
             <div className="flex justify-between items-center mb-4">
               <span className="text-gray-600">Total</span>
-              <span className="text-2xl font-bold text-primary">R$ {total.toFixed(2)}</span>
+              <span className="text-2xl font-bold text-primary">{formatCurrency(total)}</span>
             </div>
             {step === 'cart' ? (
               <button 

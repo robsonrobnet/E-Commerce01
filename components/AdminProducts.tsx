@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Wand2, Loader2, X, AlertCircle, Upload, Star, DollarSign, Image as ImageIcon } from 'lucide-react';
+import { Plus, Edit, Trash2, Wand2, Loader2, X, AlertCircle, Upload, Star, DollarSign, Image as ImageIcon, CheckCircle2 } from 'lucide-react';
 import { Product } from '../types';
 import { fetchProducts, createProduct, updateProduct, deleteProduct } from '../services/supabaseService';
 import { generateProductDescription } from '../services/geminiService';
 import { INITIAL_PRODUCTS } from '../lib/constants';
+import { formatCurrency } from '../lib/utils';
 
 interface AdminProductsProps {
   useMockData: boolean;
@@ -159,12 +160,22 @@ const AdminProducts: React.FC<AdminProductsProps> = ({ useMockData }) => {
     // Since types might conflict with null/undefined handling in Supabase vs TypeScript, cast as any for the generic update/create wrapper if needed, 
     // but our service expects Partial<Product>.
     if (editingProduct) {
-      await updateProduct(editingProduct.id, finalData as Partial<Product>);
+      const result = await updateProduct(editingProduct.id, finalData as Partial<Product>);
+      if (result) {
+        setIsModalOpen(false);
+        loadData();
+      } else {
+        alert("Erro ao atualizar produto.");
+      }
     } else {
-      await createProduct(finalData as Product);
+      const result = await createProduct(finalData as Product);
+      if (result) {
+        setIsModalOpen(false);
+        loadData();
+      } else {
+        alert("Erro ao criar produto.");
+      }
     }
-    setIsModalOpen(false);
-    loadData();
   };
 
   const handleDelete = async (id: string) => {
@@ -219,14 +230,14 @@ const AdminProducts: React.FC<AdminProductsProps> = ({ useMockData }) => {
                      <div className="flex flex-col">
                         {product.promotional_price ? (
                             <>
-                                <span className="text-xs text-gray-400 line-through">R$ {product.price.toFixed(2)}</span>
-                                <span className="font-bold text-green-600">R$ {product.promotional_price.toFixed(2)}</span>
+                                <span className="text-xs text-gray-400 line-through">{formatCurrency(product.price)}</span>
+                                <span className="font-bold text-green-600">{formatCurrency(product.promotional_price)}</span>
                             </>
                         ) : (
-                            <span className="font-bold text-gray-800">R$ {product.price.toFixed(2)}</span>
+                            <span className="font-bold text-gray-800">{formatCurrency(product.price)}</span>
                         )}
                         {product.cost_price && (
-                            <span className="text-[10px] text-gray-400">Custo: R$ {product.cost_price.toFixed(2)}</span>
+                            <span className="text-[10px] text-gray-400">Custo: {formatCurrency(product.cost_price)}</span>
                         )}
                      </div>
                   </td>
