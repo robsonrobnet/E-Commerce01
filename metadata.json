@@ -1,5 +1,6 @@
 {
   "name": "Papelaria Encantada",
   "description": "Uma loja virtual completa para papelaria com gestão de produtos, integração Supabase e IA.",
-  "requestFramePermissions": []
+  "requestFramePermissions": [],
+  "majorCapabilities": []
 }
