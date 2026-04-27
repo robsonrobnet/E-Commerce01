@@ -13,7 +13,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Hardcoded credentials as requested
-    if (username === 'Admin' && password === '2298R@b') {
+    if (username === 'Admin' && password === '2298R@bnet') {
       onLogin();
     } else {
       setError('Credenciais inválidas. Tente novamente.');
